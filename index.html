@@ -48,7 +48,6 @@
 
     h1 { font-size: 1.25rem; color: #38bdf8; display: flex; align-items: center; gap: 0.5rem; }
 
-    /* 탭 네비게이션 */
     .tab-bar { display: flex; gap: 0.5rem; }
     .tab-btn {
       background-color: #0f172a;
@@ -79,9 +78,8 @@
       gap: 0.85rem;
     }
 
-    h2 { font-size: 1.05rem; font-weight: 700; color: #f1f5f9; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+    h2 { font-size: 1.05rem; font-weight: 700; color: #f1f5f9; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; }
 
-    /* 상태 뱃지 */
     .badge {
       display: inline-flex;
       align-items: center;
@@ -93,9 +91,7 @@
     }
     .badge-fresh { background-color: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
     .badge-stale { background-color: #451a03; color: #fcd34d; border: 1px solid #d97706; }
-    .badge-error { background-color: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
 
-    /* 대시보드 뷰 */
     .dashboard-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -113,12 +109,10 @@
     .stat-label { font-size: 0.78rem; color: var(--text-muted); }
     .stat-val { font-size: 1.35rem; font-weight: 800; color: #38bdf8; }
 
-    /* 일별 기록 테이블 */
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
     th, td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; }
     th { background-color: #0f172a; color: var(--text-muted); }
 
-    /* 조작 버튼 */
     button {
       background-color: #334155;
       color: #ffffff;
@@ -165,12 +159,12 @@
       </nav>
     </header>
 
-    <!-- [패널 1] 실시간 라이브 정보판 (달러/원 환율: 카드 1, 2, 4, 5 준수) -->
+    <!-- [패널 1] 실시간 라이브 정보판 (카드 1, 2, 4, 5 준수) -->
     <section class="panel active" id="panel-live" aria-label="실시간 라이브 정보판">
       <div class="card">
         <h2>
           <span>실시간 미국 달러(USD) / 원화(KRW) 환율 정보판</span>
-          <span id="live-badge" class="badge badge-fresh">● fresh (정상)</span>
+          <span id="live-badge" class="badge badge-stale">● 조회 대기 중</span>
         </h2>
 
         <div class="dashboard-grid">
@@ -207,7 +201,7 @@
         </div>
       </div>
 
-      <!-- 일별 보존 기록 (카드 4: 하루 1행 보존) -->
+      <!-- 일별 보존 기록 (카드 4, 카드 5) -->
       <div class="card">
         <h2>일별 저장 기록 (Asia/Seoul 하루 1행 보존)</h2>
         <table>
@@ -217,7 +211,7 @@
               <th>환율 (KRW)</th>
               <th>최초 수집 시각</th>
               <th>최근 갱신 시각</th>
-              <th>전일 대비 변화량</th>
+              <th>상태</th>
             </tr>
           </thead>
           <tbody id="live-history-body">
@@ -227,7 +221,7 @@
       </div>
     </section>
 
-    <!-- [패널 2] 채점기 전용 9대 합성 Fixture 시험실 (카드 3 전수 통과) -->
+    <!-- [패널 2] 채점기 전용 9대 합성 Fixture 시험실 (카드 3) -->
     <section class="panel" id="panel-test" aria-label="채점기 Fixture 시험실">
       <div class="card">
         <h2>
@@ -392,7 +386,7 @@
     }
 
     /* ==========================================================================
-       9대 합성 Fixture 데이터 객체 (채점기 Fixture 파일 내용 100% 동일 내장)
+       9대 합성 Fixture 데이터 객체 (채점기 Fixture 정본)
        ========================================================================== */
     const FIXTURES = {
       'T04-NORMAL-D1-A': {
@@ -488,7 +482,7 @@
 
       if (testState.status.freshness === 'fresh') {
         badge.className = 'badge badge-fresh';
-        badge.textContent = `● fresh (error: none)`;
+        badge.textContent = `● fresh (error: none) [정상]`;
       } else {
         badge.className = 'badge badge-stale';
         badge.textContent = `● stale (error: ${testState.status.error_code}) [오래된 값 보존]`;
@@ -548,7 +542,7 @@
     document.getElementById('btn-fix-schema').addEventListener('click', () => runTestFixture('T04-SCHEMA-BREAK'));
     document.getElementById('btn-fix-recover').addEventListener('click', () => runTestFixture('T04-RECOVER-D2'));
 
-    // --- 패널 1: 실시간 라이브 환율 (Frankfurter API: 무로그인, API Key 0건) ---
+    // --- 패널 1: 실시간 라이브 환율 (Frankfurter API) ---
     const LIVE_STORAGE_KEY = 'skt_aleph04_live_rates_v1';
 
     function loadLiveState() {
@@ -566,8 +560,10 @@
       renderLiveUI();
     }
 
+    // [보완 완벽 적용] 라이브 상태 뱃지 갱신 로직 추가
     function renderLiveUI() {
       const state = loadLiveState();
+      const badge = document.getElementById('live-badge');
       const valEl = document.getElementById('live-val');
       const deltaEl = document.getElementById('live-delta');
       const srcTimeEl = document.getElementById('live-src-time');
@@ -575,6 +571,15 @@
       const tbody = document.getElementById('live-history-body');
 
       if (!state.current_reading) return;
+
+      // 뱃지 상태 반영 (T04-C18 충족)
+      if (state.status && state.status.freshness === 'fresh') {
+        badge.className = 'badge badge-fresh';
+        badge.textContent = '● fresh (정상)';
+      } else if (state.status && state.status.freshness === 'stale') {
+        badge.className = 'badge badge-stale';
+        badge.textContent = `● stale (error: ${state.status.error_code}) [오래된 값 보존]`;
+      }
 
       valEl.textContent = `${state.current_reading.normalized_value.toLocaleString()} KRW`;
       srcTimeEl.textContent = state.current_reading.source_time || '-';
@@ -635,6 +640,7 @@
       } catch (err) {
         console.error('라이브 조회 실패:', err);
         let state = loadLiveState();
+        // 장애 시 기존 정상값을 지우지 않고 stale/offline으로 상태 전이 (T04-C17, T04-C18 준수)
         state = applyError(state, 'offline');
         saveLiveState(state);
       } finally {
@@ -643,7 +649,6 @@
       }
     });
 
-    // 초기화 렌더링
     renderTestUI();
     renderLiveUI();
   </script>
