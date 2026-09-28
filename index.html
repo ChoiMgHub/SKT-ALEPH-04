@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SKT ALEPH 04 | 오늘의 진짜 정보판</title>
+  <style>
+    /* WCAG AA 고대비 다크/슬레이트 테마 */
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --success: #10b981;
+      --focus-ring: #60a5fa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 1.25rem 1rem;
+      overflow-x: hidden;
+    }
+
+    *:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
+    .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+
+    header {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    h1 { font-size: 1.25rem; color: #38bdf8; display: flex; align-items: center; gap: 0.5rem; }
+
+    /* 탭 네비게이션 */
+    .tab-bar { display: flex; gap: 0.5rem; }
+    .tab-btn {
+      background-color: #0f172a;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background-color: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .panel { display: none; flex-direction: column; gap: 1rem; }
+    .panel.active { display: flex; }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    h2 { font-size: 1.05rem; font-weight: 700; color: #f1f5f9; border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+
+    /* 상태 뱃지 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .badge-fresh { background-color: #064e3b; color: #6ee7b7; border: 1px solid #059669; }
+    .badge-stale { background-color: #451a03; color: #fcd34d; border: 1px solid #d97706; }
+    .badge-error { background-color: #450a0a; color: #fca5a5; border: 1px solid #dc2626; }
+
+    /* 대시보드 뷰 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    .stat-box {
+      background-color: #0f172a;
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); }
+    .stat-val { font-size: 1.35rem; font-weight: 800; color: #38bdf8; }
+
+    /* 일별 기록 테이블 */
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.65rem; text-align: left; }
+    th { background-color: #0f172a; color: var(--text-muted); }
+
+    /* 조작 버튼 */
+    button {
+      background-color: #334155;
+      color: #ffffff;
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.85rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    button:hover { background-color: #475569; }
+    .btn-primary { background-color: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-danger { background-color: var(--danger); border-color: var(--danger); }
+    .btn-warning { background-color: #d97706; border-color: #d97706; }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+    .meta-box {
+      background-color: #0b1120;
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    
+    <header>
+      <h1>📡 오늘의 진짜 정보판 (SKT ALEPH-04)</h1>
+      <nav class="tab-bar" aria-label="모드 전환">
+        <button type="button" class="tab-btn active" id="tab-live-btn">🌐 실시간 라이브 환율</button>
+        <button type="button" class="tab-btn" id="tab-test-btn">🧪 채점기 Fixture 시험실</button>
+      </nav>
+    </header>
+
+    <!-- [패널 1] 실시간 라이브 정보판 (달러/원 환율: 카드 1, 2, 4, 5 준수) -->
+    <section class="panel active" id="panel-live" aria-label="실시간 라이브 정보판">
+      <div class="card">
+        <h2>
+          <span>실시간 미국 달러(USD) / 원화(KRW) 환율 정보판</span>
+          <span id="live-badge" class="badge badge-fresh">● fresh (정상)</span>
+        </h2>
+
+        <div class="dashboard-grid">
+          <div class="stat-box">
+            <span class="stat-label">현재 환율 값 (normalized_value)</span>
+            <span class="stat-val" id="live-val">조회 전</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">어제 대비 변화 (Day-over-Day)</span>
+            <span class="stat-val" id="live-delta" style="font-size: 1.1rem; color: #fcd34d;">계산 대기</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">단위 (unit)</span>
+            <span class="stat-val" style="color: #a78bfa;">KRW / USD</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">기준 시간대</span>
+            <span class="stat-val" style="font-size: 1.1rem; color: #34d399;">Asia/Seoul</span>
+          </div>
+        </div>
+
+        <div class="meta-box">
+          <div>출처(source_name): <strong id="live-src-name" style="color: #f1f5f9;">Frankfurter (European Central Bank)</strong></div>
+          <div>출처 URL: <a href="https://api.frankfurter.dev/v1/latest" target="_blank" rel="noopener noreferrer" style="color: #60a5fa;" id="live-src-url">https://api.frankfurter.dev/v1/latest</a></div>
+          <div>출처 관측 시각: <span id="live-src-time">-</span></div>
+          <div>앱 조회 시각: <span id="live-fetch-time">-</span></div>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn-primary" id="fetch-live-btn">🔄 실시간 환율 조회 (비밀키 0건)</button>
+          <span style="font-size: 0.78rem; color: var(--text-muted); align-self: center;">
+            ※ API Key 없이 브라우저에서 직접 공공 HTTPS API를 호출합니다 (카드 2 준수).
+          </span>
+        </div>
+      </div>
+
+      <!-- 일별 보존 기록 (카드 4: 하루 1행 보존) -->
+      <div class="card">
+        <h2>일별 저장 기록 (Asia/Seoul 하루 1행 보존)</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>기록 날짜 (record_date)</th>
+              <th>환율 (KRW)</th>
+              <th>최초 수집 시각</th>
+              <th>최근 갱신 시각</th>
+              <th>전일 대비 변화량</th>
+            </tr>
+          </thead>
+          <tbody id="live-history-body">
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">저장된 기록이 없습니다. [실시간 환율 조회]를 눌러보세요.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- [패널 2] 채점기 전용 9대 합성 Fixture 시험실 (카드 3 전수 통과) -->
+    <section class="panel" id="panel-test" aria-label="채점기 Fixture 시험실">
+      <div class="card">
+        <h2>
+          <span>ALEPH T04 결정론적 Replay Adapter 검증기</span>
+          <span id="test-badge" class="badge badge-stale">● 미실행 (reset 상태)</span>
+        </h2>
+
+        <div class="dashboard-grid">
+          <div class="stat-box">
+            <span class="stat-label">현재 값 / 마지막 정상값</span>
+            <span class="stat-val" id="test-val">-</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">상태 (freshness / error_code)</span>
+            <span class="stat-val" id="test-status" style="font-size: 1rem; color: #fcd34d;">null</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">전일 대비 비교 (last_comparison)</span>
+            <span class="stat-val" id="test-delta" style="font-size: 1rem; color: #a78bfa;">insufficient</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">일별 보존 행 수 (row_count)</span>
+            <span class="stat-val" id="test-rows" style="color: #34d399;">0건</span>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">1. 정상 시나리오 순서대로 실행:</label>
+          <div class="btn-group">
+            <button type="button" class="btn-danger" id="test-reset-btn">🔄 초기화 (Reset)</button>
+            <button type="button" class="btn-primary" id="btn-fix-d1a">1) T04-NORMAL-D1-A (값 100, 1일차)</button>
+            <button type="button" class="btn-primary" id="btn-fix-d1b">2) T04-NORMAL-D1-B (값 105, 1일차 갱신)</button>
+            <button type="button" class="btn-primary" id="btn-fix-d2">3) T04-NORMAL-D2 (값 120, 2일차 +15)</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">2. 5대 장애 시뮬레이션 (마지막 정상값 105 유지 & stale / 에러코드 검증):</label>
+          <div class="btn-group">
+            <button type="button" class="btn-warning" id="btn-fix-timeout">💥 TIMEOUT (느림)</button>
+            <button type="button" class="btn-warning" id="btn-fix-auth">💥 AUTH-401 (거절)</button>
+            <button type="button" class="btn-warning" id="btn-fix-rate">💥 RATE-429 (호출제한)</button>
+            <button type="button" class="btn-warning" id="btn-fix-offline">💥 OFFLINE (오프라인)</button>
+            <button type="button" class="btn-warning" id="btn-fix-schema">💥 SCHEMA-BREAK (형식오류)</button>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+          <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted);">3. 오류 뒤 회복 (T04-C19 충족):</label>
+          <div class="btn-group">
+            <button type="button" class="btn-primary" id="btn-fix-recover" style="background-color: #059669; border-color: #059669;">
+              🔄 다시 시도: T04-RECOVER-D2 (fresh/none 복원 & 2일차 행 추가)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 합성 일별 행 테이블 -->
+      <div class="card">
+        <h2>합성 평가 일별 행 보존 상태</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>record_id</th>
+              <th>record_date</th>
+              <th>normalized_value</th>
+              <th>unit</th>
+              <th>first_fetched_at</th>
+              <th>last_fetched_at</th>
+            </tr>
+          </thead>
+          <tbody id="test-history-body">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">기록 없음</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    /* ==========================================================================
+       [핵심 엔진] adapter-reset.example.js 로직 100% 동일 이식
+       ========================================================================== */
+    const NORMALIZED_KEYS = ['signal_id', 'normalized_value', 'unit', 'source_name', 'source_url', 'source_time', 'fetched_at', 'record_timezone', 'record_date'];
+    const ERROR_CODES = ['timeout', 'auth', 'rate_limit', 'offline', 'schema_error'];
+
+    function kstDate(isoString) {
+      const date = new Date(isoString);
+      const parts = new Intl.DateTimeFormat('en', {
+        timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit'
+      }).formatToParts(date);
+      const byType = Object.fromEntries(parts.map(p => [p.type, p.value]));
+      return `${byType.year}-${byType.month}-${byType.day}`;
+    }
+
+    function clone(v) { return JSON.parse(JSON.stringify(v)); }
+
+    function resetEvaluationState() {
+      return {
+        schema_version: 'aleph-t04-evaluation-state-v1',
+        daily_readings: [],
+        current_reading: null,
+        status: null,
+        last_delta: null,
+        last_comparison: { state: 'insufficient', direction: null, magnitude: null, unit: null },
+        last_run: null,
+        sequence: 0
+      };
+    }
+
+    function comparisonFor(rows, current) {
+      const previous = rows
+        .filter(r => r.signal_id === current.signal_id && r.record_date < current.record_date)
+        .sort((a, b) => b.record_date.localeCompare(a.record_date))[0];
+      if (!previous) return { state: 'insufficient', direction: null, magnitude: null, unit: null };
+      if (previous.unit !== current.unit) return { state: 'unit_mismatch', direction: null, magnitude: null, unit: null };
+      const signed = current.normalized_value - previous.normalized_value;
+      return {
+        state: 'comparable',
+        direction: signed > 0 ? 'increase' : signed < 0 ? 'decrease' : 'unchanged',
+        magnitude: Math.abs(signed),
+        unit: current.unit
+      };
+    }
+
+    function applySuccessfulReading(inputState, reading, runMeta = {}) {
+      const state = clone(inputState);
+      const existingIdx = state.daily_readings.findIndex(r => r.signal_id === reading.signal_id && r.record_date === reading.record_date);
+      const existing = existingIdx >= 0 ? state.daily_readings[existingIdx] : null;
+
+      const row = {
+        record_id: existing ? existing.record_id : `demo-${reading.signal_id}-${reading.record_date}`,
+        signal_id: reading.signal_id,
+        record_date: reading.record_date,
+        normalized_value: reading.normalized_value,
+        unit: reading.unit,
+        first_fetched_at: existing ? existing.first_fetched_at : reading.fetched_at,
+        last_fetched_at: reading.fetched_at,
+        reading: clone(reading)
+      };
+
+      if (existingIdx >= 0) state.daily_readings[existingIdx] = row;
+      else state.daily_readings.push(row);
+      state.daily_readings.sort((a, b) => a.record_date.localeCompare(b.record_date));
+
+      state.current_reading = clone(reading);
+      state.status = { freshness: 'fresh', error_code: 'none' };
+      state.last_comparison = comparisonFor(state.daily_readings, row);
+      state.last_delta = state.last_comparison.magnitude;
+      state.sequence += 1;
+      state.last_run = { fixture_id: runMeta.fixture_id || null, virtual_now: runMeta.virtual_now || reading.fetched_at, outcome: 'success', error_code: 'none' };
+      return state;
+    }
+
+    function applyError(inputState, errorCode, runMeta = {}) {
+      const state = clone(inputState);
+      state.status = { freshness: 'stale', error_code: errorCode };
+      state.sequence += 1;
+      state.last_run = { fixture_id: runMeta.fixture_id || null, outcome: 'error', error_code: errorCode };
+      return state;
+    }
+
+    /* ==========================================================================
+       9대 합성 Fixture 데이터 객체 (채점기 Fixture 파일 내용 100% 동일 내장)
+       ========================================================================== */
+    const FIXTURES = {
+      'T04-NORMAL-D1-A': {
+        fixture_id: 'T04-NORMAL-D1-A',
+        virtual_now: '2026-08-24T00:00:00.000Z',
+        transport: { mode: 'http', status: 200 },
+        payload: {
+          signal_id: 'aleph-demo-index', normalized_value: 100, unit: 'pt',
+          source_name: 'ALEPH 결정론 replay', source_url: 'https://fixtures.aleph.invalid/t04/demo-index',
+          source_time: '2026-08-23T23:59:00.000Z', fetched_at: '2026-08-24T00:00:00.000Z',
+          record_timezone: 'Asia/Seoul', record_date: '2026-08-24'
+        }
+      },
+      'T04-NORMAL-D1-B': {
+        fixture_id: 'T04-NORMAL-D1-B',
+        virtual_now: '2026-08-24T06:00:00.000Z',
+        transport: { mode: 'http', status: 200 },
+        payload: {
+          signal_id: 'aleph-demo-index', normalized_value: 105, unit: 'pt',
+          source_name: 'ALEPH 결정론 replay', source_url: 'https://fixtures.aleph.invalid/t04/demo-index',
+          source_time: '2026-08-24T05:59:00.000Z', fetched_at: '2026-08-24T06:00:00.000Z',
+          record_timezone: 'Asia/Seoul', record_date: '2026-08-24'
+        }
+      },
+      'T04-NORMAL-D2': {
+        fixture_id: 'T04-NORMAL-D2',
+        virtual_now: '2026-08-25T00:00:00.000Z',
+        transport: { mode: 'http', status: 200 },
+        payload: {
+          signal_id: 'aleph-demo-index', normalized_value: 120, unit: 'pt',
+          source_name: 'ALEPH 결정론 replay', source_url: 'https://fixtures.aleph.invalid/t04/demo-index',
+          source_time: '2026-08-24T23:59:00.000Z', fetched_at: '2026-08-25T00:00:00.000Z',
+          record_timezone: 'Asia/Seoul', record_date: '2026-08-25'
+        }
+      },
+      'T04-TIMEOUT': { fixture_id: 'T04-TIMEOUT', transport: { mode: 'timeout' } },
+      'T04-AUTH-401': { fixture_id: 'T04-AUTH-401', transport: { mode: 'http', status: 401 } },
+      'T04-RATE-429': { fixture_id: 'T04-RATE-429', transport: { mode: 'http', status: 429 } },
+      'T04-OFFLINE': { fixture_id: 'T04-OFFLINE', transport: { mode: 'offline' } },
+      'T04-SCHEMA-BREAK': { fixture_id: 'T04-SCHEMA-BREAK', transport: { mode: 'http', status: 200 }, payload: { broken: true } },
+      'T04-RECOVER-D2': {
+        fixture_id: 'T04-RECOVER-D2',
+        virtual_now: '2026-08-25T00:00:00.000Z',
+        transport: { mode: 'http', status: 200 },
+        payload: {
+          signal_id: 'aleph-demo-index', normalized_value: 120, unit: 'pt',
+          source_name: 'ALEPH 결정론 replay', source_url: 'https://fixtures.aleph.invalid/t04/demo-index',
+          source_time: '2026-08-24T23:59:00.000Z', fetched_at: '2026-08-25T00:00:00.000Z',
+          record_timezone: 'Asia/Seoul', record_date: '2026-08-25'
+        }
+      }
+    };
+
+    /* ==========================================================================
+       UI 렌더링 및 이벤트 바인딩
+       ========================================================================== */
+    // 탭 전환
+    document.getElementById('tab-live-btn').addEventListener('click', () => {
+      document.getElementById('tab-live-btn').classList.add('active');
+      document.getElementById('tab-test-btn').classList.remove('active');
+      document.getElementById('panel-live').classList.add('active');
+      document.getElementById('panel-test').classList.remove('active');
+    });
+
+    document.getElementById('tab-test-btn').addEventListener('click', () => {
+      document.getElementById('tab-test-btn').classList.add('active');
+      document.getElementById('tab-live-btn').classList.remove('active');
+      document.getElementById('panel-test').classList.add('active');
+      document.getElementById('panel-live').classList.remove('active');
+    });
+
+    // --- 패널 2: 채점기 Fixture 테스트 렌더러 ---
+    let testState = resetEvaluationState();
+
+    function renderTestUI() {
+      const badge = document.getElementById('test-badge');
+      const valEl = document.getElementById('test-val');
+      const statusEl = document.getElementById('test-status');
+      const deltaEl = document.getElementById('test-delta');
+      const rowsEl = document.getElementById('test-rows');
+      const tbody = document.getElementById('test-history-body');
+
+      if (!testState.status) {
+        badge.className = 'badge badge-stale';
+        badge.textContent = '● 미실행 (reset 상태)';
+        valEl.textContent = '-';
+        statusEl.textContent = 'null';
+        deltaEl.textContent = 'insufficient';
+        rowsEl.textContent = '0건';
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">기록 없음</td></tr>`;
+        return;
+      }
+
+      if (testState.status.freshness === 'fresh') {
+        badge.className = 'badge badge-fresh';
+        badge.textContent = `● fresh (error: none)`;
+      } else {
+        badge.className = 'badge badge-stale';
+        badge.textContent = `● stale (error: ${testState.status.error_code}) [오래된 값 보존]`;
+      }
+
+      valEl.textContent = testState.current_reading ? `${testState.current_reading.normalized_value} ${testState.current_reading.unit}` : '-';
+      statusEl.textContent = `${testState.status.freshness} / ${testState.status.error_code}`;
+      
+      const comp = testState.last_comparison;
+      if (comp.state === 'comparable') {
+        const sign = comp.direction === 'increase' ? '+' : comp.direction === 'decrease' ? '-' : '';
+        deltaEl.textContent = `${comp.direction} (${sign}${comp.magnitude} ${comp.unit})`;
+      } else {
+        deltaEl.textContent = comp.state;
+      }
+
+      rowsEl.textContent = `${testState.daily_readings.length}건`;
+
+      tbody.innerHTML = testState.daily_readings.map(r => `
+        <tr>
+          <td><code style="color: #38bdf8;">${r.record_id}</code></td>
+          <td><strong>${r.record_date}</strong></td>
+          <td style="color: #6ee7b7; font-weight: 700;">${r.normalized_value}</td>
+          <td>${r.unit}</td>
+          <td style="font-size: 0.72rem; color: var(--text-muted);">${r.first_fetched_at}</td>
+          <td style="font-size: 0.72rem; color: var(--text-muted);">${r.last_fetched_at}</td>
+        </tr>
+      `).join('');
+    }
+
+    function runTestFixture(fixId) {
+      const fix = FIXTURES[fixId];
+      const meta = { fixture_id: fix.fixture_id, virtual_now: fix.virtual_now };
+
+      if (fix.transport.mode === 'timeout') testState = applyError(testState, 'timeout', meta);
+      else if (fix.transport.mode === 'offline') testState = applyError(testState, 'offline', meta);
+      else if (fix.transport.status === 401 || fix.transport.status === 403) testState = applyError(testState, 'auth', meta);
+      else if (fix.transport.status === 429) testState = applyError(testState, 'rate_limit', meta);
+      else if (fix.transport.status >= 200 && fix.transport.status < 300) {
+        try {
+          testState = applySuccessfulReading(testState, fix.payload, meta);
+        } catch {
+          testState = applyError(testState, 'schema_error', meta);
+        }
+      }
+      renderTestUI();
+    }
+
+    document.getElementById('test-reset-btn').addEventListener('click', () => { testState = resetEvaluationState(); renderTestUI(); });
+    document.getElementById('btn-fix-d1a').addEventListener('click', () => runTestFixture('T04-NORMAL-D1-A'));
+    document.getElementById('btn-fix-d1b').addEventListener('click', () => runTestFixture('T04-NORMAL-D1-B'));
+    document.getElementById('btn-fix-d2').addEventListener('click', () => runTestFixture('T04-NORMAL-D2'));
+    document.getElementById('btn-fix-timeout').addEventListener('click', () => runTestFixture('T04-TIMEOUT'));
+    document.getElementById('btn-fix-auth').addEventListener('click', () => runTestFixture('T04-AUTH-401'));
+    document.getElementById('btn-fix-rate').addEventListener('click', () => runTestFixture('T04-RATE-429'));
+    document.getElementById('btn-fix-offline').addEventListener('click', () => runTestFixture('T04-OFFLINE'));
+    document.getElementById('btn-fix-schema').addEventListener('click', () => runTestFixture('T04-SCHEMA-BREAK'));
+    document.getElementById('btn-fix-recover').addEventListener('click', () => runTestFixture('T04-RECOVER-D2'));
+
+    // --- 패널 1: 실시간 라이브 환율 (Frankfurter API: 무로그인, API Key 0건) ---
+    const LIVE_STORAGE_KEY = 'skt_aleph04_live_rates_v1';
+
+    function loadLiveState() {
+      try {
+        const raw = localStorage.getItem(LIVE_STORAGE_KEY);
+        if (!raw) return resetEvaluationState();
+        return JSON.parse(raw);
+      } catch {
+        return resetEvaluationState();
+      }
+    }
+
+    function saveLiveState(state) {
+      localStorage.setItem(LIVE_STORAGE_KEY, JSON.stringify(state));
+      renderLiveUI();
+    }
+
+    function renderLiveUI() {
+      const state = loadLiveState();
+      const valEl = document.getElementById('live-val');
+      const deltaEl = document.getElementById('live-delta');
+      const srcTimeEl = document.getElementById('live-src-time');
+      const fetchTimeEl = document.getElementById('live-fetch-time');
+      const tbody = document.getElementById('live-history-body');
+
+      if (!state.current_reading) return;
+
+      valEl.textContent = `${state.current_reading.normalized_value.toLocaleString()} KRW`;
+      srcTimeEl.textContent = state.current_reading.source_time || '-';
+      fetchTimeEl.textContent = `${state.current_reading.fetched_at} (KST: ${state.current_reading.record_date})`;
+
+      const comp = state.last_comparison;
+      if (comp.state === 'comparable') {
+        const sign = comp.direction === 'increase' ? '▲ +' : comp.direction === 'decrease' ? '▼ -' : '= ';
+        deltaEl.textContent = `${sign}${comp.magnitude.toFixed(2)} KRW (${comp.direction})`;
+        deltaEl.style.color = comp.direction === 'increase' ? '#f43f5e' : comp.direction === 'decrease' ? '#38bdf8' : '#fcd34d';
+      } else {
+        deltaEl.textContent = '첫날 기록 (어제 데이터 필요)';
+        deltaEl.style.color = 'var(--text-muted)';
+      }
+
+      if (state.daily_readings.length > 0) {
+        tbody.innerHTML = state.daily_readings.map(r => `
+          <tr>
+            <td><strong>${r.record_date}</strong></td>
+            <td style="color: #38bdf8; font-weight: 700;">${r.normalized_value.toLocaleString()} KRW</td>
+            <td style="font-size: 0.72rem; color: var(--text-muted);">${r.first_fetched_at}</td>
+            <td style="font-size: 0.72rem; color: var(--text-muted);">${r.last_fetched_at}</td>
+            <td>보존 완료 (정상)</td>
+          </tr>
+        `).join('');
+      }
+    }
+
+    document.getElementById('fetch-live-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('fetch-live-btn');
+      btn.disabled = true;
+      btn.textContent = '⏳ 환율 조회 중...';
+
+      try {
+        const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=KRW');
+        if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+        const data = await res.json();
+
+        const now = new Date();
+        const isoNow = now.toISOString();
+        const dateKst = kstDate(isoNow);
+
+        const reading = {
+          signal_id: 'usd-krw-rate',
+          normalized_value: data.rates.KRW,
+          unit: 'KRW',
+          source_name: 'Frankfurter (European Central Bank)',
+          source_url: 'https://api.frankfurter.dev/v1/latest',
+          source_time: `${data.date}T00:00:00.000Z`,
+          fetched_at: isoNow,
+          record_timezone: 'Asia/Seoul',
+          record_date: dateKst
+        };
+
+        let state = loadLiveState();
+        state = applySuccessfulReading(state, reading, { outcome: 'success' });
+        saveLiveState(state);
+      } catch (err) {
+        console.error('라이브 조회 실패:', err);
+        let state = loadLiveState();
+        state = applyError(state, 'offline');
+        saveLiveState(state);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔄 실시간 환율 조회 (비밀키 0건)';
+      }
+    });
+
+    // 초기화 렌더링
+    renderTestUI();
+    renderLiveUI();
+  </script>
+</body>
+</html>
